@@ -1,0 +1,92 @@
+package com.JZ.Test.one;
+
+/**
+ * Study the model of motorcycle jumps
+ * @author J.Z
+ * @version 1.4
+ */
+public class TestForOneEight {
+	/*
+	 * The air resistance on a moving object f_r = −cAρvu/2
+	 * 
+	 *  c is a coefficient on the order of 1 for all other uncounted factors
+	 *  A is cross section of the moving object
+	 *  ρ is the density of the air
+	 *  v(u) is the speed (velocity)
+	 *  
+	 *  
+	 *  recursively calculate in physics
+	 *  Vx[i+1]=Vx[i]+((-kv^2 [i]*cosθ[i])/m dt)
+         *  Vy[i+1]=Vy[i]+((-kv^2 [i]*sinθ[i]-mg)/m dt)
+         *  θ[i+1]=arctan⁡(Vx[i]/(Vy[i]))
+         *  v^2 [i+1]=Vx[i]^2+Vy[i]^2
+	 */
+	static final int n = 10000;
+	static double dt = 0.001;
+	/* parameter:
+	 * cross section is A = 0.93m^2
+	 * the air density is ρ = 1.2 kg/m^3
+	 * the coefficient c is 1
+	 * the maximum taking-off speed of the motorcycle is 67 m/s
+	 * the combined mass of the motorcycle and the person is m = 250 kg	
+	 * the gravity coefficient is 9.8 m/s^2
+	 */		
+	static final double A = 0.93;
+	static final double p = 1.2;
+	static final double c = 1;
+	static final double v_0 = 67;
+	static final double m = 250;	
+	static final double g = 9.8;
+	//simplify c*A*p/m = k
+	static double k =A*p*c/m;	
+	
+	public static void main(String[] args) {		
+		//set the d_theta
+		double d_theta = 0.5*Math.PI/n;
+		double range[] = new double[n+1];
+		double theta_0 = 0;
+		
+		// n+1 data points
+		for(int j=0;j<n;++j){
+			//initial v1 theta1 Vx1 Vy1 V_square1 X1 Y1
+			double X1=0,X2=0;
+			//set Y2=1 to keep the while-loop program running
+			double Y1=0,Y2=1;
+			double v1 = v_0;
+			double theta1 = theta_0,theta2=0;
+			double Vx1 = v1*Math.cos(theta1),Vx2=0;
+			double Vy1 = v1*Math.sin(theta1),Vy2=0;
+			double V_square1 = Math.pow(v1, 2),V_square2=0;
+			
+			//recursively calculate
+			while(Y2 > 1e-5){						
+				Vx2 = Vx1 - k*V_square1*Math.cos(theta1)*dt;
+				Vy2 = Vy1 - (k*V_square1*Math.sin(theta1)+g)*dt;
+				theta2 = Math.atan2(Vy2, Vx2);
+				V_square2 = Math.pow(Vx1,2)+Math.pow(Vy1, 2);
+				X2 = X1 +Vx1*dt;
+				Y2 = Y1 +Vy1*dt;	
+				
+				X1=X2;
+				Y1=Y2;
+				Vx1=Vx2;
+				Vy1=Vy2;
+				theta1=theta2;	
+				V_square1 = V_square2;
+			}		
+			range[j] = X2;
+//			System.out.println(theta_0+" "+range[j]);			
+			theta_0=theta_0+d_theta;			
+		}
+		//Max of range[]
+		int record=0;
+		for(int j =0;j<n-1;++j){
+			if (range[j]>range[j+1]) {
+				range[j+1] = range[j];
+			}else {
+				record = j+1;
+			}
+		}
+		System.out.println(d_theta*record);
+	}
+}
